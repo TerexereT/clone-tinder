@@ -1,11 +1,12 @@
 import { Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { FC, useState } from 'react';
+import { FC, useLayoutEffect, useState } from 'react';
 import TinderCard from 'react-tinder-card';
+import instance from '../../config/axios';
 
 interface Person {
 	name: string;
-	url: string;
+	imgUrl: string;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -42,26 +43,22 @@ const useStyles = makeStyles((theme: Theme) => ({
 const Cards: FC = () => {
 	const classes = useStyles();
 
-	const [people, setPeople] = useState<Person[]>([
-		{
-			name: 'Elon Musk',
-			url: 'https://ichef.bbci.co.uk/images/ic/640x360/p03c84wz.jpg',
-		},
-		{
-			name: 'Jeff Bezos',
-			url: 'https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/701/amazon-ceo-jeff-bezos-now-buff-1500392161.jpg',
-		},
-		{
-			name: 'Sandra Bullock',
-			url: 'https://static.mujerhoy.com/www/multimedia/202111/23/media/cortadas/nueva-pelicula-sandra-bullock-imperdonable-kOdB-U16039808671hiH-624x624@MujerHoy.jpg',
-		},
-	]);
+	const [people, setPeople] = useState<Person[]>([]);
 
 	const swiped = (direction: any, nameToDelete: string) => {};
 
 	const outOfFrame = (name: string) => {
 		console.log(name + ' abandono la pantalla!');
 	};
+
+	useLayoutEffect(() => {
+		const fetch = async () => {
+			const req = await instance.get('/tinder/card');
+			setPeople(req.data);
+		};
+		fetch();
+	}, []);
+
 	return (
 		<div className={classes.cards}>
 			<div className={classes.container}>
@@ -72,7 +69,7 @@ const Cards: FC = () => {
 						preventSwipe={['up', 'down']}
 						onSwipe={(dir) => swiped(dir, person.name)}
 						onCardLeftScreen={() => outOfFrame(person.name)}>
-						<div style={{ backgroundImage: `url(${person.url})` }} className={classes.card}>
+						<div style={{ backgroundImage: `url(${person.imgUrl})` }} className={classes.card}>
 							<h3>{person.name}</h3>
 						</div>
 					</TinderCard>
